@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Splitter — cut text down to size</title>
+<meta name="description" content="Split long text into exact character or word chunks. No uploads, nothing stored, runs entirely in your browser.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --mat-bg:#152E29;
+    --mat-bg-2:#0F2521;
+    --mat-grid:#22463E;
+    --mat-grid-strong:#2C5850;
+    --paper:#F6F1E4;
+    --paper-line:#E3DAC2;
+    --paper-shadow:#0000002e;
+    --ink:#1B1B16;
+    --ink-soft:#5B5749;
+    --accent:#E8A33D;
+    --accent-ink:#3A2405;
+    --cut:#C4432B;
+    --mono:'IBM Plex Mono', ui-monospace, monospace;
+    --sans:'IBM Plex Sans', system-ui, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--mat-bg);
+    background-image:
+      linear-gradient(var(--mat-grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--mat-grid) 1px, transparent 1px);
+    background-size:28px 28px;
+    color:var(--ink);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;}
+  }
+
+  /* ---------- Ruler strip ---------- */
+  .ruler{
+    position:sticky; top:0; z-index:20;
+    background:var(--mat-bg-2);
+    border-bottom:1px solid var(--mat-grid-strong);
+  }
+  .ruler-inner{
+    max-width:1080px; margin:0 auto; padding:0 24px;
+    display:flex; align-items:center; justify-content:space-between;
+    height:56px;
+  }
+  .brand{
+    display:flex; align-items:baseline; gap:10px;
+    font-family:var(--mono); color:var(--paper); letter-spacing:0.02em;
+  }
+  .brand-mark{
+    color:var(--accent); font-weight:700; font-size:18px;
+  }
+  .brand-name{ font-weight:600; font-size:15px; }
+  .brand-tag{
+    display:none;
+    color:#8FAFA5; font-size:12px; font-family:var(--sans);
+  }
+  @media(min-width:640px){ .brand-tag{display:inline;} }
+
+  .privacy-pill{
+    font-family:var(--mono); font-size:11px; color:#8FAFA5;
+    border:1px solid var(--mat-grid-strong); border-radius:999px;
+    padding:6px 12px; letter-spacing:0.03em; white-space:nowrap;
+  }
+  .privacy-pill b{color:var(--accent); font-weight:600;}
+
+  /* ---------- Hero ---------- */
+  .hero{
+    max-width:1080px; margin:0 auto; padding:56px 24px 28px;
+  }
+  .eyebrow{
+    font-family:var(--mono); font-size:12px; letter-spacing:0.14em;
+    text-transform:uppercase; color:var(--accent); margin:0 0 14px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .eyebrow::before{
+    content:''; width:22px; height:1px; background:var(--accent);
+  }
+  h1{
+    font-family:var(--sans); font-weight:700; color:var(--paper);
+    font-size:clamp(32px, 5vw, 52px); line-height:1.04; margin:0 0 16px;
+    letter-spacing:-0.02em; max-width:16ch;
+  }
+  h1 em{ font-style:normal; color:var(--accent); }
+  .hero p{
+    color:#B9CFC7; font-size:16px; line-height:1.6; max-width:52ch; margin:0;
+  }
+
+  /* ---------- Layout ---------- */
+  .workspace{
+    max-width:1080px; margin:0 auto; padding:8px 24px 40px;
+    display:grid; grid-template-columns:1fr; gap:20px;
+  }
+  @media(min-width:900px){
+    .workspace{ grid-template-columns:1.6fr 1fr; align-items:start; }
+  }
+
+  /* ---------- Paper card (input) ---------- */
+  .paper-card{
+    background:var(--paper);
+    border-radius:4px;
+    box-shadow:0 18px 40px -14px var(--paper-shadow), 0 2px 0 var(--paper-line);
+    position:relative;
+    overflow:hidden;
+  }
+  .paper-card::before{
+    content:'';
+    position:absolute; top:0; left:0; right:0; height:6px;
+    background-image:repeating-linear-gradient(90deg, var(--mat-bg-2) 0 3px, transparent 3px 10px);
+    opacity:0.9;
+  }
+  .card-head{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:20px 22px 0;
+  }
+  .card-title{
+    font-family:var(--mono); font-size:12px; letter-spacing:0.1em;
+    text-transform:uppercase; color:var(--ink-soft); margin:0;
+  }
+  textarea{
+    width:100%; border:none; background:transparent; resize:vertical;
+    font-family:var(--sans); font-size:15px; line-height:1.65; color:var(--ink);
+    padding:16px 22px 8px; min-height:260px; outline:none;
+  }
+  textarea::placeholder{ color:#9C9581; }
+  .stat-bar{
+    display:flex; gap:22px; flex-wrap:wrap;
+    padding:14px 22px 20px; border-top:1px dashed var(--paper-line);
+    margin:0 22px;
+  }
+  .stat{
+    font-family:var(--mono); font-size:12px; color:var(--ink-soft);
+    display:flex; align-items:baseline; gap:6px;
+  }
+  .stat b{ font-size:16px; color:var(--ink); font-weight:600; }
+  .empty-note{
+    font-size:13px; color:var(--cut); font-family:var(--mono);
+    margin-left:auto;
+  }
+
+  /* ---------- Settings card ---------- */
+  .settings-card{
+    background:var(--mat-bg-2);
+    border:1px solid var(--mat-grid-strong);
+    border-radius:4px; padding:22px;
+    position:sticky; top:76px;
+  }
+  .settings-title{
+    font-family:var(--mono); font-size:12px; letter-spacing:0.1em;
+    text-transform:uppercase; color:var(--accent); margin:0 0 16px;
+  }
+  .field-label{
+    display:block; font-size:12px; color:#B9CFC7; margin:0 0 8px;
+    font-family:var(--mono); letter-spacing:0.03em;
+  }
+  .segmented{
+    display:flex; border:1px solid var(--mat-grid-strong); border-radius:4px;
+    overflow:hidden; margin-bottom:20px;
+  }
+  .segmented button{
+    flex:1; padding:10px 8px; background:transparent; border:none;
+    color:#8FAFA5; font-family:var(--mono); font-size:12.5px;
+    letter-spacing:0.03em; cursor:pointer; transition:background .15s, color .15s;
+  }
+  .segmented button + button{ border-left:1px solid var(--mat-grid-strong); }
+  .segmented button.active{
+    background:var(--accent); color:var(--accent-ink); font-weight:600;
+  }
+  .segmented button:focus-visible{ outline:2px solid var(--accent); outline-offset:-2px; }
+
+  .ruler-input-wrap{ margin-bottom:8px; }
+  .ruler-input{
+    display:flex; align-items:center; gap:10px;
+    background:var(--mat-bg); border:1px solid var(--mat-grid-strong);
+    border-radius:4px; padding:10px 12px;
+  }
+  .ruler-input input[type="number"]{
+    flex:1; width:100%; background:transparent; border:none; outline:none;
+    color:var(--paper); font-family:var(--mono); font-size:20px; font-weight:600;
+    -moz-appearance:textfield;
+  }
+  .ruler-input input::-webkit-outer-spin-button,
+  .ruler-input input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+  .ruler-input span{ font-family:var(--mono); font-size:11px; color:#8FAFA5; }
+  .tick-strip{
+    height:10px; margin:6px 2px 18px;
+    background-image:repeating-linear-gradient(90deg, var(--mat-grid-strong) 0 1px, transparent 1px 8px);
+    opacity:0.8;
+  }
+  .field-error{
+    font-family:var(--mono); font-size:11.5px; color:var(--cut);
+    margin:-14px 0 16px; min-height:14px;
+  }
+
+  .cut-btn{
+    width:100%; padding:14px 18px; border:none; border-radius:4px;
+    background:var(--accent); color:var(--accent-ink);
+    font-family:var(--mono); font-size:13.5px; font-weight:700;
+    letter-spacing:0.04em; text-transform:uppercase; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    transition:transform .12s ease, box-shadow .12s ease;
+    box-shadow:0 6px 0 #a86e17;
+  }
+  .cut-btn:hover{ transform:translateY(1px); box-shadow:0 5px 0 #a86e17; }
+  .cut-btn:active{ transform:translateY(5px); box-shadow:0 1px 0 #a86e17; }
+  .cut-btn:disabled{
+    background:#3A4E48; color:#7B958C; box-shadow:none; cursor:not-allowed; transform:none;
+  }
+  .cut-btn:focus-visible{ outline:2px solid var(--paper); outline-offset:2px; }
+
+  .settings-foot{
+    margin-top:16px; font-size:11.5px; color:#7B958C; line-height:1.5;
+    font-family:var(--mono);
+  }
+
+  /* ---------- Results ---------- */
+  .results{
+    max-width:1080px; margin:0 auto; padding:10px 24px 80px;
+  }
+  .results-head{
+    display:flex; align-items:center; justify-content:space-between;
+    flex-wrap:wrap; gap:12px; margin:22px 0 20px;
+  }
+  .results-title{
+    font-family:var(--mono); font-size:13px; letter-spacing:0.08em;
+    text-transform:uppercase; color:var(--paper); margin:0;
+  }
+  .results-actions{ display:flex; gap:10px; flex-wrap:wrap; }
+  .ghost-btn{
+    background:transparent; border:1px solid var(--mat-grid-strong);
+    color:#B9CFC7; font-family:var(--mono); font-size:12px;
+    padding:9px 14px; border-radius:4px; cursor:pointer;
+    transition:border-color .15s, color .15s;
+  }
+  .ghost-btn:hover{ border-color:var(--accent); color:var(--accent); }
+
+  .tickets{ display:flex; flex-direction:column; gap:0; }
+  .ticket{
+    background:var(--paper); position:relative;
+    padding:20px 24px 22px;
+  }
+  .ticket:first-child{ border-radius:4px 4px 0 0; }
+  .ticket:last-child{ border-radius:0 0 4px 4px; }
+  .perf{
+    position:relative; height:0;
+  }
+  .perf svg{ display:block; width:100%; height:16px; }
+  .ticket-head{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:12px; gap:12px; flex-wrap:wrap;
+  }
+  .ticket-tag{
+    font-family:var(--mono); font-size:11.5px; letter-spacing:0.06em;
+    color:var(--ink-soft); background:#EDE6D2; border-radius:999px;
+    padding:5px 12px;
+  }
+  .ticket-stats{
+    font-family:var(--mono); font-size:11px; color:var(--ink-soft); display:flex; gap:14px;
+  }
+  .ticket-body{
+    font-family:var(--sans); font-size:14.5px; line-height:1.65; color:var(--ink);
+    max-height:220px; overflow-y:auto; white-space:pre-wrap; word-break:break-word;
+    background:#FBF8EF; border:1px solid var(--paper-line); border-radius:3px;
+    padding:14px 16px; margin-bottom:12px;
+  }
+  .ticket-foot{ display:flex; gap:10px; flex-wrap:wrap; }
+  .mini-btn{
+    background:var(--ink); color:var(--paper); border:none; border-radius:3px;
+    font-family:var(--mono); font-size:11.5px; padding:8px 14px; cursor:pointer;
+    letter-spacing:0.03em; transition:background .15s;
+  }
+  .mini-btn:hover{ background:#3B382C; }
+  .mini-btn.copied{ background:#4C7A5A; }
+  .mini-btn.outline{
+    background:transparent; color:var(--ink-soft); border:1px solid var(--paper-line);
+  }
+  .mini-btn.outline:hover{ border-color:var(--ink-soft); color:var(--ink); }
+
+  .empty-results{
+    text-align:center; padding:60px 20px; color:#7B958C;
+    font-family:var(--mono); font-size:13px; border:1px dashed var(--mat-grid-strong);
+    border-radius:4px;
+  }
+
+  footer{
+    border-top:1px solid var(--mat-grid-strong);
+    padding:26px 24px 40px;
+  }
+  .footer-inner{
+    max-width:1080px; margin:0 auto; display:flex; justify-content:space-between;
+    flex-wrap:wrap; gap:10px; font-family:var(--mono); font-size:11.5px; color:#7B958C;
+  }
+
+  .sr-only{
+    position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+    overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+  }
+</style>
+</head>
+<body>
+
+<div class="ruler">
+  <div class="ruler-inner">
+    <div class="brand">
+      <span class="brand-mark">✂</span>
+      <span class="brand-name">SPLITTER</span>
+      <span class="brand-tag">measure once, cut clean</span>
+    </div>
+    <div class="privacy-pill"><b>●</b> nothing is stored — runs in your browser</div>
+  </div>
+</div>
+
+<div class="hero">
+  <p class="eyebrow">Text Splitter</p>
+  <h1>Cut long text into <em>exact</em> sized pieces</h1>
+  <p>Paste anything too long for the box it needs to fit in. Set a character or word limit, and Splitter divides it into clean, numbered parts — ready to copy or download.</p>
+</div>
+
+<div class="workspace">
+  <!-- INPUT -->
+  <section class="paper-card">
+    <div class="card-head">
+      <p class="card-title">01 — Your text</p>
+    </div>
+    <label for="input-text" class="sr-only">Text to split</label>
+    <textarea id="input-text" placeholder="Paste or type your text here…"></textarea>
+    <div class="stat-bar">
+      <div class="stat"><b id="stat-chars">0</b> characters</div>
+      <div class="stat"><b id="stat-words">0</b> words</div>
+      <div class="empty-note" id="empty-note" hidden>Please enter text to split.</div>
+    </div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section class="settings-card">
+    <p class="settings-title">02 — Set the cut</p>
+
+    <span class="field-label">Split by</span>
+    <div class="segmented" role="group" aria-label="Split method">
+      <button type="button" id="mode-chars" class="active" aria-pressed="true">Characters</button>
+      <button type="button" id="mode-words" aria-pressed="false">Words</button>
+    </div>
+
+    <span class="field-label" id="limit-label">Max characters per part</span>
+    <div class="ruler-input-wrap">
+      <div class="ruler-input">
+        <input type="number" id="limit-input" value="5000" min="1" step="1" inputmode="numeric">
+        <span id="limit-unit">chars</span>
+      </div>
+      <div class="tick-strip" aria-hidden="true"></div>
+      <p class="field-error" id="limit-error"></p>
+    </div>
+
+    <button class="cut-btn" id="split-btn">✂ Split text</button>
+    <p class="settings-foot">No smart splitting — parts land exactly on your limit, mid-word if that's where it falls. Nothing you type ever leaves this page.</p>
+  </section>
+</div>
+
+<!-- RESULTS -->
+<div class="results" id="results-section">
+  <div class="results-head">
+    <p class="results-title" id="results-title">Result</p>
+    <div class="results-actions" id="results-actions" hidden>
+      <button class="ghost-btn" id="copy-all-btn">Copy all</button>
+      <button class="ghost-btn" id="download-all-btn">Download all (.txt)</button>
+    </div>
+  </div>
+  <div id="results-body">
+    <div class="empty-results">Your split parts will show up here.</div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <span>Splitter — split text by characters or words.</span>
+    <span>Processed locally · nothing uploaded · nothing saved</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  const inputText   = document.getElementById('input-text');
+  const statChars   = document.getElementById('stat-chars');
+  const statWords    = document.getElementById('stat-words');
+  const emptyNote    = document.getElementById('empty-note');
+  const modeCharsBtn = document.getElementById('mode-chars');
+  const modeWordsBtn = document.getElementById('mode-words');
+  const limitLabel   = document.getElementById('limit-label');
+  const limitInput   = document.getElementById('limit-input');
+  const limitUnit    = document.getElementById('limit-unit');
+  const limitError   = document.getElementById('limit-error');
+  const splitBtn      = document.getElementById('split-btn');
+  const resultsTitle  = document.getElementById('results-title');
+  const resultsActions= document.getElementById('results-actions');
+  const resultsBody   = document.getElementById('results-body');
+  const copyAllBtn    = document.getElementById('copy-all-btn');
+  const downloadAllBtn= document.getElementById('download-all-btn');
+
+  let mode = 'chars'; // 'chars' | 'words'
+  let currentChunks = [];
+
+  function wordList(text){
+    const t = text.trim();
+    if(!t) return [];
+    return t.split(/\s+/);
+  }
+
+  function updateStats(){
+    const text = inputText.value;
+    statChars.textContent = text.length.toLocaleString();
+    statWords.textContent = wordList(text).length.toLocaleString();
+    emptyNote.hidden = text.length > 0;
+    validateLimit();
+  }
+
+  function setMode(next){
+    mode = next;
+    modeCharsBtn.classList.toggle('active', mode === 'chars');
+    modeCharsBtn.setAttribute('aria-pressed', mode === 'chars');
+    modeWordsBtn.classList.toggle('active', mode === 'words');
+    modeWordsBtn.setAttribute('aria-pressed', mode === 'words');
+    limitLabel.textContent = mode === 'chars' ? 'Max characters per part' : 'Max words per part';
+    limitUnit.textContent = mode === 'chars' ? 'chars' : 'words';
+    limitInput.value = mode === 'chars' ? 5000 : 1000;
+    validateLimit();
+  }
+
+  function validateLimit(){
+    const raw = limitInput.value;
+    const n = Number(raw);
+    let msg = '';
+    if(raw === '') msg = 'Enter a limit.';
+    else if(!Number.isInteger(n)) msg = 'Whole numbers only.';
+    else if(n <= 0) msg = 'Limit must be greater than zero.';
+    limitError.textContent = msg;
+    const textOk = inputText.value.length > 0;
+    splitBtn.disabled = !!msg || !textOk;
+    return !msg;
+  }
+
+  function splitByChars(text, limit){
+    const chunks = [];
+    for(let i=0; i<text.length; i += limit){
+      chunks.push(text.slice(i, i+limit));
+    }
+    return chunks.length ? chunks : [text];
+  }
+
+  function splitByWords(text, limit){
+    const words = wordList(text);
+    const chunks = [];
+    for(let i=0; i<words.length; i += limit){
+      chunks.push(words.slice(i, i+limit).join(' '));
+    }
+    return chunks.length ? chunks : [text];
+  }
+
+  function renderResults(chunks){
+    currentChunks = chunks;
+    resultsActions.hidden = chunks.length === 0;
+    resultsTitle.textContent = chunks.length
+      ? `Result — ${chunks.length} part${chunks.length > 1 ? 's' : ''}`
+      : 'Result';
+
+    if(!chunks.length){
+      resultsBody.innerHTML = '<div class="empty-results">Your split parts will show up here.</div>';
+      return;
+    }
+
+    const perf = `<div class="perf" aria-hidden="true"><svg viewBox="0 0 400 16" preserveAspectRatio="none"><line x1="0" y1="8" x2="400" y2="8" stroke="#0F2521" stroke-width="2" stroke-dasharray="1 9" stroke-linecap="round"/></svg></div>`;
+
+    const html = chunks.map((chunk, idx) => {
+      const n = idx + 1;
+      const chars = chunk.length;
+      const words = wordList(chunk).length;
+      return `
+        ${idx > 0 ? perf : ''}
+        <div class="ticket">
+          <div class="ticket-head">
+            <span class="ticket-tag">Part ${n} / ${chunks.length}</span>
+            <div class="ticket-stats">
+              <span>${chars.toLocaleString()} chars</span>
+              <span>${words.toLocaleString()} words</span>
+            </div>
+          </div>
+          <div class="ticket-body" id="chunk-${idx}"></div>
+          <div class="ticket-foot">
+            <button class="mini-btn" data-copy="${idx}">Copy part ${n}</button>
+            <button class="mini-btn outline" data-download="${idx}">Download .txt</button>
+          </div>
+        </div>`;
+    }).join('');
+
+    resultsBody.innerHTML = `<div class="tickets">${html}</div>`;
+
+    // set text content safely (avoids HTML injection from pasted text)
+    chunks.forEach((chunk, idx) => {
+      document.getElementById(`chunk-${idx}`).textContent = chunk;
+    });
+  }
+
+  function flashCopied(btn, label){
+    const original = btn.textContent;
+    btn.textContent = label || 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = original;
+      btn.classList.remove('copied');
+    }, 1400);
+  }
+
+  function copyText(text, btn, label){
+    navigator.clipboard.writeText(text).then(() => flashCopied(btn, label)).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      flashCopied(btn, label);
+    });
+  }
+
+  function downloadText(text, filename){
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  // Events
+  inputText.addEventListener('input', updateStats);
+  limitInput.addEventListener('input', validateLimit);
+  modeCharsBtn.addEventListener('click', () => setMode('chars'));
+  modeWordsBtn.addEventListener('click', () => setMode('words'));
+
+  splitBtn.addEventListener('click', () => {
+    if(!validateLimit()) return;
+    const limit = Number(limitInput.value);
+    const text = inputText.value;
+    const chunks = mode === 'chars' ? splitByChars(text, limit) : splitByWords(text, limit);
+    renderResults(chunks);
+    document.getElementById('results-section').scrollIntoView({ behavior:'smooth', block:'start' });
+  });
+
+  resultsBody.addEventListener('click', (e) => {
+    const copyIdx = e.target.getAttribute('data-copy');
+    const dlIdx = e.target.getAttribute('data-download');
+    if(copyIdx !== null){
+      copyText(currentChunks[Number(copyIdx)], e.target, 'Copied!');
+    } else if(dlIdx !== null){
+      downloadText(currentChunks[Number(dlIdx)], `text-part-${Number(dlIdx)+1}.txt`);
+    }
+  });
+
+  copyAllBtn.addEventListener('click', () => {
+    copyText(currentChunks.join('\n\n'), copyAllBtn, 'Copied all!');
+  });
+
+  downloadAllBtn.addEventListener('click', () => {
+    currentChunks.forEach((chunk, idx) => {
+      setTimeout(() => downloadText(chunk, `text-part-${idx+1}.txt`), idx * 150);
+    });
+  });
+
+  // init
+  updateStats();
+})();
+</script>
+
+</body>
+</html>
