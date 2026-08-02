@@ -2,29 +2,30 @@
 
 A simple browser-based tool to split long text into smaller parts using character or word limits.
 
-No uploads. No storage. Everything runs locally in your browser.
+**No uploads. No storage. Everything runs locally in your browser.**
 
-# Live Website
+🌐 **Live Website:** https://himani-vasanth.github.io/text-splitter/  
+⭐ **GitHub Repository:** https://github.com/Himani-Vasanth/text-splitter
 
-🔗 **Live Website:** https://himani-vasanth.github.io/text-splitter/
+If you find this project useful, please consider giving it a ⭐ on GitHub!
 
 ## Features
 
 - Split text by character limit
 - Split text by word limit
-- Set custom chunk size
-- View character and word count
+- Set a custom chunk size
+- View character and word counts
 - Copy individual parts
-- Copy all split parts
+- Copy all split parts at once
 - Download split text files
-- Works completely offline after loading
+- Works offline after the page loads
 - No data leaves your browser
 
 ## Why?
 
-Many platforms have text limits. Splitter makes it easy to break long content into smaller, ready-to-use pieces.
+Many websites and apps have character or word limits. Text Splitter makes it easy to break long content into smaller, ready-to-use pieces.
 
-Useful for:
+Perfect for:
 - AI prompts
 - Social media posts
 - Long messages
@@ -33,13 +34,13 @@ Useful for:
 
 ## How to Use
 
-1. Paste your text
-2. Choose **Characters** or **Words**
-3. Set the maximum size per part
-4. Click **Split text**
-5. Copy or download your results
+1. Paste your text.
+2. Select **Characters** or **Words**.
+3. Enter the maximum size for each part.
+4. Click **Split Text**.
+5. Copy or download the results.
 
-## Tech Used
+## Tech Stack
 
 - HTML
 - CSS
@@ -47,17 +48,12 @@ Useful for:
 
 ## Privacy
 
-Splitter processes everything on your device.
+Everything is processed locally in your browser.
 
-Your text is never uploaded, stored, or sent anywhere.
-
-## Visit Website
-
-**Website:** [https://himani-vasanth.github.io/text-splitter/](https://himani-vasanth.github.io/text-splitter/)
+Your text is **never uploaded, stored, or shared**.
 
 ## License
 
 All rights reserved.
 
-This project is available for viewing and educational reference only.
-The source code may not be copied, modified, redistributed, or used in other projects without permission.
+This project is available for viewing and educational reference only. The source code may not be copied, modified, redistributed, or used in other projects without permission.
