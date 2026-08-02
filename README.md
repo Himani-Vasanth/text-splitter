@@ -47,17 +47,9 @@ Splitter processes everything on your device.
 
 Your text is never uploaded, stored, or sent anywhere.
 
-## Run Locally
+## Visit Website
 
-Clone the repository:
-
-```bash
-git clone https://github.com/yourusername/text-splitter.git
-```
-
-Open `index.html` in your browser.
-
-No installation or setup required.
+**Website:** [text-splitter](https://himani-vasanth.github.io/text-splitter/)
 
 ## License
 
