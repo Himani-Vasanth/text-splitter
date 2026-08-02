@@ -1,0 +1,20 @@
+Copyright (c) 2026 [Himani Vasanth]
+
+All Rights Reserved.
+
+This source code and its associated assets (the "Software") are the
+proprietary property of the copyright holder listed above. The Software
+is made available for use through the hosted website only.
+
+Except as expressly permitted by written agreement with the copyright
+holder, no person may:
+  - copy, reproduce, or redistribute the Software or any portion of it
+  - modify, adapt, translate, or create derivative works based on it
+  - reverse engineer, decompile, or disassemble it
+  - use it to build a competing product or service
+  - remove or alter any copyright, trademark, or attribution notices
+
+Unauthorized use is a violation of copyright law and may result in
+legal action.
+
+For licensing inquiries, contact: himanivasanth01@gmail.com
