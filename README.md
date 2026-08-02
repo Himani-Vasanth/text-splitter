@@ -4,6 +4,10 @@ A simple browser-based tool to split long text into smaller parts using characte
 
 No uploads. No storage. Everything runs locally in your browser.
 
+# Live Website
+
+🔗 **Live Website:** https://himani-vasanth.github.io/text-splitter/
+
 ## Features
 
 - Split text by character limit
@@ -49,7 +53,7 @@ Your text is never uploaded, stored, or sent anywhere.
 
 ## Visit Website
 
-**Website:** [text-splitter](https://himani-vasanth.github.io/text-splitter/)
+**Website:** [https://himani-vasanth.github.io/text-splitter/](https://himani-vasanth.github.io/text-splitter/)
 
 ## License
 
