@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://himani-vasanth.github.io/text-splitter/sitemap.xml
