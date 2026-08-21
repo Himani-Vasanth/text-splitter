@@ -76,7 +76,7 @@ function loadGoogleAnalytics(){
     border-bottom:1px solid var(--mat-grid-strong);
   }
   .ruler-inner{
-    max-width:1080px; margin:0 auto; padding:0 24px;
+    max-width:1200px; margin:0 auto; padding:0 24px;
     display:flex; align-items:center; justify-content:space-between;
     height:56px;
   }
@@ -101,35 +101,38 @@ function loadGoogleAnalytics(){
   }
   .privacy-pill b{color:var(--accent); font-weight:600;}
 
-  /* ---------- Hero ---------- */
-  .hero{
-    max-width:1080px; margin:0 auto; padding:56px 24px 28px;
+  /* ---------- Intro (sidebar description) ---------- */
+  .intro{
+    padding-top:6px;
   }
   .eyebrow{
-    font-family:var(--mono); font-size:12px; letter-spacing:0.14em;
-    text-transform:uppercase; color:var(--accent); margin:0 0 14px;
-    display:flex; align-items:center; gap:10px;
+    font-family:var(--mono); font-size:11px; letter-spacing:0.14em;
+    text-transform:uppercase; color:var(--accent); margin:0 0 12px;
+    display:flex; align-items:center; gap:8px;
   }
   .eyebrow::before{
-    content:''; width:22px; height:1px; background:var(--accent);
+    content:''; width:16px; height:1px; background:var(--accent);
   }
-  h1{
+  .intro h1{
     font-family:var(--sans); font-weight:700; color:var(--paper);
-    font-size:clamp(32px, 5vw, 52px); line-height:1.04; margin:0 0 16px;
-    letter-spacing:-0.02em; max-width:16ch;
+    font-size:clamp(22px, 2vw, 28px); line-height:1.12; margin:0 0 12px;
+    letter-spacing:-0.01em; max-width:none;
   }
-  h1 em{ font-style:normal; color:var(--accent); }
-  .hero p{
-    color:#B9CFC7; font-size:16px; line-height:1.6; max-width:52ch; margin:0;
+  .intro h1 em{ font-style:normal; color:var(--accent); }
+  .intro p{
+    color:#B9CFC7; font-size:13.5px; line-height:1.6; margin:0;
   }
 
   /* ---------- Layout ---------- */
   .workspace{
-    max-width:1080px; margin:0 auto; padding:8px 24px 40px;
+    max-width:1200px; margin:0 auto; padding:40px 24px 40px;
     display:grid; grid-template-columns:1fr; gap:20px;
   }
   @media(min-width:900px){
-    .workspace{ grid-template-columns:1.6fr 1fr; align-items:start; }
+    .workspace{ grid-template-columns:220px 1.5fr 1fr; align-items:start; }
+  }
+  @media(min-width:1200px){
+    .workspace{ grid-template-columns:260px 1.7fr 1fr; }
   }
 
   /* ---------- Paper card (input) ---------- */
@@ -154,19 +157,36 @@ function loadGoogleAnalytics(){
     font-family:var(--mono); font-size:12px; letter-spacing:0.1em;
     text-transform:uppercase; color:var(--ink-soft); margin:0;
   }
-  .upload-btn{
-    font-family:var(--mono); font-size:11.5px; color:var(--ink-soft);
-    border:1px solid var(--paper-line); border-radius:4px;
-    padding:6px 12px; cursor:pointer; letter-spacing:0.03em;
-    transition:border-color .15s, color .15s;
+  .input-wrap{ position:relative; }
+  .empty-state{
+    position:absolute; top:0; left:0; right:0; bottom:0;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:12px; padding:20px; text-align:center; pointer-events:none;
   }
-  .upload-btn:hover{
-    border-color:var(--accent); color:var(--accent-ink);
+  .empty-state[hidden]{ display:none; }
+  .empty-state-title{
+    font-family:var(--sans); font-size:17px; font-weight:600; color:var(--ink-soft); margin:0;
   }
+  .empty-state-sub{
+    font-family:var(--mono); font-size:11px; letter-spacing:0.08em; text-transform:uppercase;
+    color:#9C9581; margin:0;
+  }
+  .upload-btn-big{
+    pointer-events:auto;
+    font-family:var(--mono); font-size:13px; font-weight:700; color:var(--accent-ink);
+    background:var(--accent); border:1px solid var(--accent); border-radius:6px;
+    padding:12px 24px; cursor:pointer; letter-spacing:0.03em;
+    display:inline-flex; align-items:center; gap:8px;
+    box-shadow:0 4px 0 #a86e17;
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .upload-btn-big::before{ content:'⇧'; font-size:15px; }
+  .upload-btn-big:hover{ transform:translateY(1px); box-shadow:0 3px 0 #a86e17; }
+  .upload-btn-big:active{ transform:translateY(3px); box-shadow:0 1px 0 #a86e17; }
   textarea{
     width:100%; border:none; background:transparent; resize:vertical;
-    font-family:var(--sans); font-size:15px; line-height:1.65; color:var(--ink);
-    padding:16px 22px 8px; min-height:260px; outline:none;
+    font-family:var(--sans); font-size:16px; line-height:1.65; color:var(--ink);
+    padding:16px 22px 8px; min-height:320px; outline:none;
   }
   textarea::placeholder{ color:#9C9581; }
   .stat-bar{
@@ -261,7 +281,7 @@ function loadGoogleAnalytics(){
 
   /* ---------- Results ---------- */
   .results{
-    max-width:1080px; margin:0 auto; padding:10px 24px 80px;
+    max-width:1200px; margin:0 auto; padding:10px 24px 80px;
   }
   .results-head{
     display:flex; align-items:center; justify-content:space-between;
@@ -333,7 +353,7 @@ function loadGoogleAnalytics(){
     padding:26px 24px 40px;
   }
   .footer-inner{
-    max-width:1080px; margin:0 auto; display:flex; justify-content:space-between;
+    max-width:1200px; margin:0 auto; display:flex; justify-content:space-between;
     flex-wrap:wrap; gap:10px; font-family:var(--mono); font-size:11.5px; color:#7B958C;
   }
 
@@ -372,6 +392,7 @@ function loadGoogleAnalytics(){
   }
   .consent-btn.accept{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); font-weight:700; }
   .consent-btn:hover{ opacity:0.9; }
+  .consent-banner[hidden]{ display:none; }
   @media(max-width:480px){
     .consent-banner{ flex-direction:column; align-items:stretch; }
     .consent-actions{ justify-content:flex-end; }
@@ -391,22 +412,29 @@ function loadGoogleAnalytics(){
   </div>
 </div>
 
-<div class="hero">
-  <p class="eyebrow">Text Splitter</p>
-  <h1>Cut long text into <em>exact</em> sized pieces</h1>
-  <p>Paste anything too long for the box it needs to fit in. Set a character or word limit, and Splitter divides it into clean, numbered parts — ready to copy or download.</p>
-</div>
-
 <div class="workspace">
+  <!-- INTRO -->
+  <aside class="intro">
+    <p class="eyebrow">Text Splitter</p>
+    <h1>Cut long text into <em>exact</em> sized pieces</h1>
+    <p>Paste anything too long for the box it needs to fit in. Set a character or word limit, and Splitter divides it into clean, numbered parts — ready to copy or download.</p>
+  </aside>
+
   <!-- INPUT -->
   <section class="paper-card">
     <div class="card-head">
       <p class="card-title">01 — Your text</p>
-      <label class="upload-btn" for="file-upload">Upload .txt file</label>
-      <input type="file" id="file-upload" accept=".txt,text/plain" class="sr-only">
     </div>
-    <label for="input-text" class="sr-only">Text to split</label>
-    <textarea id="input-text" placeholder="Paste or type your text here…"></textarea>
+    <div class="input-wrap">
+      <label for="input-text" class="sr-only">Text to split</label>
+      <textarea id="input-text" placeholder=""></textarea>
+      <div class="empty-state" id="empty-state">
+        <p class="empty-state-title">Paste or type your text here</p>
+        <p class="empty-state-sub">— or —</p>
+        <label class="upload-btn-big" for="file-upload">Upload a .txt file</label>
+        <input type="file" id="file-upload" accept=".txt,text/plain" class="sr-only">
+      </div>
+    </div>
     <div class="stat-bar">
       <div class="stat"><b id="stat-chars">0</b> characters</div>
       <div class="stat"><b id="stat-words">0</b> words</div>
@@ -477,6 +505,7 @@ function loadGoogleAnalytics(){
 (function(){
   const inputText   = document.getElementById('input-text');
   const fileInput   = document.getElementById('file-upload');
+  const emptyState  = document.getElementById('empty-state');
   const statChars   = document.getElementById('stat-chars');
   const statWords    = document.getElementById('stat-words');
   const emptyNote    = document.getElementById('empty-note');
@@ -507,6 +536,7 @@ function loadGoogleAnalytics(){
     statChars.textContent = text.length.toLocaleString();
     statWords.textContent = wordList(text).length.toLocaleString();
     emptyNote.hidden = text.length > 0;
+    emptyState.hidden = text.length > 0;
     validateLimit();
   }
 
