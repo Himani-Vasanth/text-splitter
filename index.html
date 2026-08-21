@@ -1,13 +1,30 @@
+
+<!--
+  Splitter — https://himani-vasanth.github.io/text-splitter/
+  © 2026 Himani Vasanth. All rights reserved.
+  This source code is proprietary. No part of it may be copied,
+  reproduced, redistributed, or used to create derivative works
+  without prior written permission from the copyright holder.
+-->
+<!DOCTYPE html>
+<html lang="en">
 <head>
 
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-SL1BVEX32J"></script>
+<!-- Google tag (gtag.js) — loaded only after cookie consent, see consent script near </body> -->
 <script>
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-
-gtag('config', 'G-SL1BVEX32J');
+window.__GA_ID = 'G-SL1BVEX32J';
+function loadGoogleAnalytics(){
+  if(window.__gaLoaded) return;
+  window.__gaLoaded = true;
+  var s = document.createElement('script');
+  s.async = true;
+  s.src = 'https://www.googletagmanager.com/gtag/js?id=' + window.__GA_ID;
+  document.head.appendChild(s);
+  gtag('js', new Date());
+  gtag('config', window.__GA_ID);
+}
 </script>
 
 <meta charset="UTF-8">
@@ -15,6 +32,7 @@ gtag('config', 'G-SL1BVEX32J');
 
 <title>Splitter — cut text down to size</title>
 <meta name="description" content="Split long text into exact character or word chunks. No uploads, nothing stored, runs entirely in your browser.">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -135,6 +153,15 @@ gtag('config', 'G-SL1BVEX32J');
   .card-title{
     font-family:var(--mono); font-size:12px; letter-spacing:0.1em;
     text-transform:uppercase; color:var(--ink-soft); margin:0;
+  }
+  .upload-btn{
+    font-family:var(--mono); font-size:11.5px; color:var(--ink-soft);
+    border:1px solid var(--paper-line); border-radius:4px;
+    padding:6px 12px; cursor:pointer; letter-spacing:0.03em;
+    transition:border-color .15s, color .15s;
+  }
+  .upload-btn:hover{
+    border-color:var(--accent); color:var(--accent-ink);
   }
   textarea{
     width:100%; border:none; background:transparent; resize:vertical;
@@ -323,6 +350,32 @@ gtag('config', 'G-SL1BVEX32J');
     position:absolute; width:1px; height:1px; padding:0; margin:-1px;
     overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
   }
+
+  /* ---------- Cookie consent banner ---------- */
+  .consent-banner{
+    position:fixed; left:16px; right:16px; bottom:16px; z-index:100;
+    max-width:640px; margin:0 auto;
+    background:var(--mat-bg-2); border:1px solid var(--mat-grid-strong); border-radius:6px;
+    padding:18px 20px; box-shadow:0 20px 50px -12px #000a;
+    font-family:var(--sans);
+    display:flex; flex-wrap:wrap; align-items:center; gap:14px;
+  }
+  .consent-banner p{
+    margin:0; color:#D8E4DF; font-size:13.5px; line-height:1.55; flex:1 1 260px;
+  }
+  .consent-banner a{ color:var(--accent); }
+  .consent-actions{ display:flex; gap:8px; flex-shrink:0; }
+  .consent-btn{
+    font-family:var(--mono); font-size:12px; letter-spacing:0.03em;
+    padding:9px 14px; border-radius:4px; cursor:pointer;
+    border:1px solid var(--mat-grid-strong); background:transparent; color:#B9CFC7;
+  }
+  .consent-btn.accept{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); font-weight:700; }
+  .consent-btn:hover{ opacity:0.9; }
+  @media(max-width:480px){
+    .consent-banner{ flex-direction:column; align-items:stretch; }
+    .consent-actions{ justify-content:flex-end; }
+  }
 </style>
 </head>
 <body>
@@ -349,6 +402,8 @@ gtag('config', 'G-SL1BVEX32J');
   <section class="paper-card">
     <div class="card-head">
       <p class="card-title">01 — Your text</p>
+      <label class="upload-btn" for="file-upload">Upload .txt file</label>
+      <input type="file" id="file-upload" accept=".txt,text/plain" class="sr-only">
     </div>
     <label for="input-text" class="sr-only">Text to split</label>
     <textarea id="input-text" placeholder="Paste or type your text here…"></textarea>
@@ -400,7 +455,7 @@ gtag('config', 'G-SL1BVEX32J');
 
 <footer>
   <div class="footer-inner">
-    <span>Splitter — split text by characters or words.</span>
+    <span>Splitter — split text by characters or words. © 2026 Splitter</span>
 
     <span>
       Processed locally · nothing uploaded · nothing saved ·
@@ -410,9 +465,18 @@ gtag('config', 'G-SL1BVEX32J');
   </div>
 </footer>
 
+<div class="consent-banner" id="consent-banner" hidden>
+  <p>We use Google Analytics to understand site usage. Your text is never collected. See our <a href="privacy.html">Privacy Policy</a>.</p>
+  <div class="consent-actions">
+    <button class="consent-btn" id="consent-decline" type="button">Decline</button>
+    <button class="consent-btn accept" id="consent-accept" type="button">Accept</button>
+  </div>
+</div>
+
 <script>
 (function(){
   const inputText   = document.getElementById('input-text');
+  const fileInput   = document.getElementById('file-upload');
   const statChars   = document.getElementById('stat-chars');
   const statWords    = document.getElementById('stat-words');
   const emptyNote    = document.getElementById('empty-note');
@@ -570,6 +634,23 @@ gtag('config', 'G-SL1BVEX32J');
   modeCharsBtn.addEventListener('click', () => setMode('chars'));
   modeWordsBtn.addEventListener('click', () => setMode('words'));
 
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      inputText.value = evt.target.result;
+      updateStats();
+    };
+    reader.onerror = () => {
+      alert('Could not read that file. Please try a plain .txt file.');
+    };
+    reader.readAsText(file);
+
+    fileInput.value = ''; // allows re-uploading the same file later
+  });
+
   splitBtn.addEventListener('click', () => {
     if(!validateLimit()) return;
     const limit = Number(limitInput.value);
@@ -601,6 +682,34 @@ gtag('config', 'G-SL1BVEX32J');
 
   // init
   updateStats();
+})();
+</script>
+
+<script>
+(function(){
+  var KEY = 'splitter_cookie_consent';
+  var banner = document.getElementById('consent-banner');
+  var acceptBtn = document.getElementById('consent-accept');
+  var declineBtn = document.getElementById('consent-decline');
+  var saved;
+  try { saved = localStorage.getItem(KEY); } catch(e){ saved = null; }
+
+  if(saved === 'accepted'){
+    loadGoogleAnalytics();
+  } else if(saved === 'declined'){
+    // do nothing, respect prior choice
+  } else {
+    banner.hidden = false;
+  }
+
+  function choose(value){
+    try { localStorage.setItem(KEY, value); } catch(e){}
+    banner.hidden = true;
+    if(value === 'accepted') loadGoogleAnalytics();
+  }
+
+  acceptBtn.addEventListener('click', function(){ choose('accepted'); });
+  declineBtn.addEventListener('click', function(){ choose('declined'); });
 })();
 </script>
 
